@@ -4,6 +4,7 @@ import { combineEpics, StateObservable } from 'redux-observable';
 import { filter, map, mergeMap, Observable } from 'rxjs';
 import client from '../client';
 import * as actionTypes from '../redux/ActionTypes';
+import * as actions from '../redux/Actions';
 
 const QUERY_ALL_DUCKS = gql`
     query getDucks{
@@ -69,12 +70,7 @@ const epicAddition = (action$: Observable<any>, state$: StateObservable<void>): 
     }),
     map((result: any) => {
         if(result.data.createDuck) {
-            return ({
-                type: actionTypes.DUCK_ADDED,
-                payload: {
-                    duck: result.data.createDuck
-                }
-            })
+            return actions.duckAdded(result.data.createDuck)
         }
         return{type: null};
     })
@@ -86,7 +82,6 @@ const epicUpdating = (action$: Observable<any>, state$: StateObservable<void>): 
         return client.mutate({
             mutation: UPDATE_DUCK_MUTATION,
             variables: {input: {name: action.payload.name, color: action.payload.color, _id: action.payload._id}},
-          //   refetchQueries: [ {query: CREATE_DUCK_MUTATION}],
           })
     }),
     map((result: any) => {
